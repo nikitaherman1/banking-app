@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ public class EmailDataController {
     private final EmailDataService emailDataService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("@ownerShipService.checkOwner(#request)")
     public void save(@RequestBody @Valid CreateEmailDataDTO createEmailDataDTO, HttpServletRequest request) {
         emailDataService.save(createEmailDataDTO);

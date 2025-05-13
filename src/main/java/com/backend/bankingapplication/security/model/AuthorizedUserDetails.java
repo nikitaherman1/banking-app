@@ -14,6 +14,7 @@ public class AuthorizedUserDetails implements UserDetails {
     private final Long userId;
     private final String login;
     private final String password;
+    private List<GrantedAuthority> grantedAuthorities;
 
     public AuthorizedUserDetails(BankingUser bankingUser) {
         this.login = bankingUser.getPreferredLogin();
@@ -21,9 +22,16 @@ public class AuthorizedUserDetails implements UserDetails {
         this.password = bankingUser.getPassword();
     }
 
+    public AuthorizedUserDetails(List<GrantedAuthority> grantedAuthorities, Long userId, String password, String login) {
+        this.grantedAuthorities = grantedAuthorities;
+        this.userId = userId;
+        this.password = password;
+        this.login = login;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return grantedAuthorities;
     }
 
     @Override

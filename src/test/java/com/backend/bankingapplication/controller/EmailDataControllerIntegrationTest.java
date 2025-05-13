@@ -1,103 +1,82 @@
 package com.backend.bankingapplication.controller;
 
 import com.backend.bankingapplication.app.dto.create.CreateEmailDataDTO;
-import com.backend.bankingapplication.app.service.EmailDataService;
-import com.backend.bankingapplication.security.service.impl.OwnerShipService;
+import com.backend.bankingapplication.app.repository.EmailDataRepository;
+import com.backend.bankingapplication.base.BaseIntegrationTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Testcontainers
-@SpringBootTest
-@ActiveProfiles("test")
-@ExtendWith(SpringExtension.class)
-@AutoConfigureMockMvc(addFilters = false)
-class EmailDataControllerIntegrationTest {
+@Slf4j
+class EmailDataControllerIntegrationTest extends BaseIntegrationTest {
 
     private static final String TEST_PATH = "/emails";
-    private static final String TEST_EMAIL = "test@email.com";
+
+    private final CreateEmailDataDTO correctEmailData = new CreateEmailDataDTO("test@email.com");
+    private final CreateEmailDataDTO incorrectEmailData = new CreateEmailDataDTO("testemail.com");
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;;
+    private ObjectMapper objectMapper;
 
-    private final OwnerShipService ownerShipService = mock(OwnerShipService.class);
+    @Autowired
+    private EmailDataRepository emailDataRepository;
 
-    private final EmailDataService emailDataService = mock(EmailDataService.class);
-
-    @Container
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
-            .withDatabaseName("database")
-            .withUsername("user")
-            .withPassword("password");
-
-    @DynamicPropertySource
-    static void configureRegistry(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
+    @BeforeEach
+    public void cleanup() {
+        emailDataRepository.deleteAll();
     }
 
     @Test
-    void testSaveEmailData_shouldCallService_whenAuthorizedAndOwnerCheckPasses() throws Exception {
-        when(ownerShipService.checkOwner(any(HttpServletRequest.class))).thenReturn(true);
-
-        CreateEmailDataDTO dto = new CreateEmailDataDTO();
-        dto.setEmail(TEST_EMAIL);
-
+    @WithAuthUser
+    void shouldSuccessSave() throws Exception {
         mockMvc.perform(post(TEST_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true));
+                        .content(objectMapper.writeValueAsString(correctEmailData)))
+                .andExpect(status().isCreated());
 
-        verify(emailDataService, times(1)).save(dto);
+        boolean existsByEmail = emailDataRepository.existsByEmail(correctEmailData.getEmail());
+        assertTrue(existsByEmail);
     }
 
     @Test
-    void testSaveEmailData_shouldReturnForbidden_whenOwnershipCheckFails() throws Exception {
-        when(ownerShipService.checkOwner(any(HttpServletRequest.class))).thenReturn(false);
-
-        CreateEmailDataDTO dto = new CreateEmailDataDTO();
-        dto.setEmail(TEST_EMAIL);
+    @WithAuthUser
+    void shouldBadRequest_whenSendingEmailDataTwice() throws Exception {
+        mockMvc.perform(post(TEST_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(correctEmailData)))
+                .andExpect(status().isCreated());
 
         mockMvc.perform(post(TEST_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isForbidden());
-
-        verify(emailDataService, never()).save(dto);
+                        .content(objectMapper.writeValueAsString(correctEmailData)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testSaveEmailData_shouldReturnUnauthorized_whenNotAuthenticated() throws Exception {
-        CreateEmailDataDTO dto = new CreateEmailDataDTO();
-        dto.setEmail(TEST_EMAIL);
-
+    @WithAuthUser
+    void shouldThrowBadRequest_whenSendIncorrectEmailData() throws Exception {
         mockMvc.perform(post(TEST_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(objectMapper.writeValueAsString(incorrectEmailData)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldThrowUnauthorized_whenEmptySecurityContext() throws Exception {
+        mockMvc.perform(post(TEST_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(correctEmailData)))
                 .andExpect(status().isUnauthorized());
     }
 }

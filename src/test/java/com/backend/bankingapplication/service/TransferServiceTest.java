@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class TransferServiceTest {
 
@@ -47,7 +49,7 @@ public class TransferServiceTest {
     }
 
     @Test
-    void trySecureTransfer_successTransfer() {
+    void shouldSuccessTransfer() {
         when(authService.getCurrentUserId()).thenReturn(fromUserId);
 
         transferService.trySecureTransfer(transferRequestDTO);
@@ -57,7 +59,7 @@ public class TransferServiceTest {
     }
 
     @Test
-    void trySecureTransfer_duplicateRequestException() {
+    void shouldThrowDuplicationRequestException_whenIdempotencyKeyIsAlreadyUsed() {
         String errorMessage = "Duplicate transfer request";
 
         when(authService.getCurrentUserId()).thenReturn(fromUserId);
@@ -77,7 +79,7 @@ public class TransferServiceTest {
     }
 
     @Test
-    void trySecureTransfer_generalException() {
+    void shouldThrowException_whenSecureTransfer() {
         String errorMessage = "Some exception";
 
         when(authService.getCurrentUserId()).thenReturn(fromUserId);
