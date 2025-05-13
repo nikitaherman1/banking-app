@@ -2,7 +2,7 @@ spring:
   application:
     name: BankingApplication
   datasource:
-    url: jdbc:postgresql://postgres:5432/banking
+    url: jdbc:postgresql://172.27.239.227:5432/banking
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
@@ -11,8 +11,10 @@ spring:
       ddl-auto: validate
   data:
     redis:
-      host: redis
+      host: 172.27.239.227
       port: 6379
+  profiles:
+    active: prod
 rsa:
   public-key-location: security/public.key
   private-key-location: security/private.key

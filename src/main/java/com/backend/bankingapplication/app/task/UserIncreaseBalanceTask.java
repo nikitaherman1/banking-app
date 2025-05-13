@@ -1,4 +1,4 @@
-package com.backend.bankingapplication.core.task;
+package com.backend.bankingapplication.app.task;
 
 import com.backend.bankingapplication.app.entity.FailedAccrual;
 import com.backend.bankingapplication.app.repository.AccountRepository;

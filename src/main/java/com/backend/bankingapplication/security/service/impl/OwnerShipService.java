@@ -25,7 +25,7 @@ public class OwnerShipService {
     private final PhoneDataRepository phoneDataRepository;
     private final EmailDataRepository emailDataRepository;
 
-    public <T extends Ownable<I>, I extends Serializable> void checkOwnerShip(Class<T> tClass, Long resourceId, HttpServletRequest request) {
+    public <T extends Ownable<I>, I extends Serializable> boolean checkOwnerShip(Class<T> tClass, Long resourceId, HttpServletRequest request) {
         Long currentUserId = authService.getCurrentUserId();
         checkOwner(request);
 
@@ -34,14 +34,16 @@ public class OwnerShipService {
         if (!exists) {
             logAndThrowAccessDeniedException(request);
         }
+        return true;
     }
 
-    public void checkOwner(HttpServletRequest request) {
+    public boolean checkOwner(HttpServletRequest request) {
         Long currentUserId = authService.getCurrentUserId();
 
         if (!userService.existsByUserId(currentUserId)) {
             logAndThrowAccessDeniedException(request);
         }
+        return true;
     }
 
     /** * We safely cast here because we checked the class before with `equals`.
