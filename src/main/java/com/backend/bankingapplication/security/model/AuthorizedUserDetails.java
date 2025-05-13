@@ -5,11 +5,15 @@ import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
 @Getter
 public class AuthorizedUserDetails implements UserDetails {
+
+    @Serial
+    private static final long serialVersionUID = 8073795133745076883L;
 
     private final Long userId;
     private final String login;
