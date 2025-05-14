@@ -9,6 +9,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+  elasticsearch:
+    password: elastic
+    username: elastic
+    uris: http://elasticsearch:9200
   data:
     redis:
       host: redis

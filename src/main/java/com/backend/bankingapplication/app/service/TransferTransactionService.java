@@ -43,6 +43,7 @@ public class TransferTransactionService {
         accountRepository.saveAll(Arrays.asList(sourceAccount, targetAccount));
     }
 
+    // TODO !!!!!!! Urgently fix the identity key !!!!!!!
     private void validateIdempotencyKey(TransferRequestDTO transferRequestDTO) {
         String idempotencyKey = transferRequestDTO.getIdempotencyKey();
 //        if (transferLogRepository.existsByIdempotencyKey(idempotencyKey)) {

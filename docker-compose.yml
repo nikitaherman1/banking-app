@@ -72,7 +72,6 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
 
-
   logstash:
     image: logstash:8.7.1
     container_name: logstash
@@ -87,7 +86,6 @@ services:
       - ./logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
       - ./pipelines.yml:/usr/share/logstash/config/pipelines.yml
-
 volumes:
   banking_data:
     driver: local
