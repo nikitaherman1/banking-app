@@ -1,7 +1,6 @@
 package com.backend.bankingapplication.service;
 
 import com.backend.bankingapplication.app.dto.create.TransferRequestDTO;
-import com.backend.bankingapplication.app.service.TransferLogService;
 import com.backend.bankingapplication.app.service.TransferService;
 import com.backend.bankingapplication.app.service.TransferTransactionService;
 import com.backend.bankingapplication.security.service.impl.AuthService;
@@ -36,9 +35,6 @@ public class TransferServiceTest {
     private AuthService authService;
 
     @Mock
-    private TransferLogService transferLogService;
-
-    @Mock
     private TransferTransactionService transferTransactionService;
 
     @BeforeEach
@@ -55,7 +51,6 @@ public class TransferServiceTest {
         transferService.trySecureTransfer(transferRequestDTO);
 
         verify(transferTransactionService).secureTransfer(transferRequestDTO, fromUserId);
-        verify(transferLogService).createAndSaveLog(transferRequestDTO, fromUserId, true, null);
     }
 
     @Test
@@ -74,8 +69,6 @@ public class TransferServiceTest {
         assertEquals(errorMessage, exception.getMessage());
 
         verify(transferTransactionService).secureTransfer(transferRequestDTO, fromUserId);
-        verify(transferLogService, never()).createAndSaveLog(any(), any(), eq(true), any());
-        verify(transferLogService).createAndSaveLog(transferRequestDTO, fromUserId, false, errorMessage);
     }
 
     @Test
@@ -93,6 +86,5 @@ public class TransferServiceTest {
 
         assertEquals(errorMessage, exception.getMessage());
         verify(transferTransactionService).secureTransfer(transferRequestDTO, fromUserId);
-        verify(transferLogService).createAndSaveLog(transferRequestDTO, fromUserId, false, errorMessage);
     }
 }

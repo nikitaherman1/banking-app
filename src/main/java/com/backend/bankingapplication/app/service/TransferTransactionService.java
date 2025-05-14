@@ -3,9 +3,7 @@ package com.backend.bankingapplication.app.service;
 import com.backend.bankingapplication.app.dto.create.TransferRequestDTO;
 import com.backend.bankingapplication.app.entity.Account;
 import com.backend.bankingapplication.app.repository.AccountRepository;
-import com.backend.bankingapplication.app.repository.TransferLogRepository;
 import com.backend.bankingapplication.core.exception.BadRequestDataException;
-import com.backend.bankingapplication.core.exception.DuplicateRequestException;
 import com.backend.bankingapplication.core.exception.InsufficientFundsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +21,6 @@ public class TransferTransactionService {
 
     private final AccountService accountService;
     private final AccountRepository accountRepository;
-    private final TransferLogRepository transferLogRepository;
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void secureTransfer(TransferRequestDTO transferRequestDTO, Long fromUserId) {
@@ -48,10 +45,10 @@ public class TransferTransactionService {
 
     private void validateIdempotencyKey(TransferRequestDTO transferRequestDTO) {
         String idempotencyKey = transferRequestDTO.getIdempotencyKey();
-        if (transferLogRepository.existsByIdempotencyKey(idempotencyKey)) {
-            log.warn("Duplicate request detected with idempotency key: {}", idempotencyKey);
-            throw new DuplicateRequestException("This operation was already executed");
-        }
+//        if (transferLogRepository.existsByIdempotencyKey(idempotencyKey)) {
+//            log.warn("Duplicate request detected with idempotency key: {}", idempotencyKey);
+//            throw new DuplicateRequestException("This operation was already executed");
+//        }
     }
 
     private Account getSourceAccountAndCheckBalance(Long fromUserId, BigDecimal value) {

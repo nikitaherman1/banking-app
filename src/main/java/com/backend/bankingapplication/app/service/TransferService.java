@@ -1,8 +1,8 @@
 package com.backend.bankingapplication.app.service;
 
-import com.backend.bankingapplication.security.service.impl.AuthService;
 import com.backend.bankingapplication.app.dto.create.TransferRequestDTO;
 import com.backend.bankingapplication.core.exception.DuplicateRequestException;
+import com.backend.bankingapplication.security.service.impl.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -12,6 +12,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import static io.netty.handler.logging.LogLevel.ERROR;
+import static io.netty.handler.logging.LogLevel.INFO;
 
 @Slf4j
 @Service
@@ -37,7 +40,9 @@ public class TransferService {
                     "Transfer of {} funds from user with id {} to user with id {} completed successfully",
                     transferRequestDTO.getValue(), fromUserId, transferRequestDTO.getToUserId()
             );
-            transferLogService.createAndSaveLog(transferRequestDTO, fromUserId, true, null);
+            transferLogService.saveTransferLog(
+                    transferRequestDTO, fromUserId, INFO.name(), null, true
+            );
         } catch (DuplicateRequestException exception) {
             log.warn(exception.getMessage());
             throw exception;
@@ -46,7 +51,9 @@ public class TransferService {
                     "Transfer of {} funds from user with id {} to user with ID {} ended with an error, error message: {}",
                     transferRequestDTO.getValue(), fromUserId, transferRequestDTO.getToUserId(), exception.getMessage()
             );
-            transferLogService.createAndSaveLog(transferRequestDTO, fromUserId, false, exception.getMessage());
+            transferLogService.saveTransferLog(
+                    transferRequestDTO, fromUserId, ERROR.name(), exception.getMessage(), false
+            );
             throw exception;
         }
     }

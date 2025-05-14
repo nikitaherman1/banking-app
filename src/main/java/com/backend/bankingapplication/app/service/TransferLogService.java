@@ -1,14 +1,11 @@
 package com.backend.bankingapplication.app.service;
 
 import com.backend.bankingapplication.app.dto.create.TransferRequestDTO;
-import com.backend.bankingapplication.app.entity.TransferLog;
-import com.backend.bankingapplication.app.repository.TransferLogRepository;
+import com.backend.bankingapplication.core.logger.model.impl.TransferLogDTO;
+import com.backend.bankingapplication.core.logger.service.KafkaLogger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -17,21 +14,22 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class TransferLogService {
 
-    private final TransferLogRepository transferLogRepository;
+    private final KafkaLogger<TransferLogDTO> transferLogger;
 
-    @Async
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void createAndSaveLog(TransferRequestDTO requestDTO, Long fromUserId, Boolean success, String failureMessage) {
-        TransferLog transferLog = new TransferLog();
-        transferLog.setSuccess(success);
-        transferLog.setFromUserId(fromUserId);
-        transferLog.setValue(requestDTO.getValue());
-        transferLog.setFailureMessage(failureMessage);
-        transferLog.setCreatedAt(LocalDateTime.now());
-        transferLog.setToUserId(requestDTO.getToUserId());
-        transferLog.setIdempotencyKey(requestDTO.getIdempotencyKey());
+    public void saveTransferLog(
+            TransferRequestDTO requestDTO, Long fromUserId, String level, String failureMessage, boolean success
+    ) {
+        TransferLogDTO transferLogDTO = new TransferLogDTO();
+        transferLogDTO.setLevel(level);
+        transferLogDTO.setSuccess(success);
+        transferLogDTO.setFromUserId(fromUserId);
+        transferLogDTO.setValue(requestDTO.getValue());
+        transferLogDTO.setCreatedAt(LocalDateTime.now());
+        transferLogDTO.setFailureMessage(failureMessage);
+        transferLogDTO.setToUserId(requestDTO.getToUserId());
+        transferLogDTO.setIdempotencyKey(requestDTO.getIdempotencyKey());
 
-        log.info("Saving transfer log: {}", transferLog);
-        transferLogRepository.save(transferLog);
+        log.info("Send transfer log to kafka: {}", transferLogDTO);
+        transferLogger.logEvent(transferLogDTO);
     }
 }

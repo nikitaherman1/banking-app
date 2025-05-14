@@ -15,6 +15,14 @@ spring:
       port: 6379
   profiles:
     active: prod
+  kafka:
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topic:
+      auth-logs: auth-logs
+      transfer-logs: transfer-logs
 rsa:
   public-key-location: security/public.key
   private-key-location: security/private.key

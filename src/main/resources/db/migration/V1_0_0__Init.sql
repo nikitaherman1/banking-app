@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS banking_user (
     password            varchar(500)    not null ,
     preferred_login     varchar(200)    not null unique
 );
--- password123
+
 CREATE TABLE IF NOT EXISTS account (
     id                  bigint          primary key ,
     user_id             bigint          not null unique ,
@@ -43,16 +43,6 @@ CREATE TABLE IF NOT EXISTS failed_accrual (
     error_message       varchar         not null ,
     created_at          timestamp       not null default now(),
     last_retry_at       timestamp
-);
-
-CREATE TABLE IF NOT EXISTS transfer_log (
-    idempotency_key     varchar         primary key ,
-    from_user_id        bigint          not null ,
-    to_user_id          bigint          not null ,
-    value               decimal         not null ,
-    success             boolean         not null ,
-    failure_message     varchar ,
-    created_at          timestamp       not null
 );
 
 INSERT INTO banking_user (id, name, date_of_birth, password, preferred_login) VALUES

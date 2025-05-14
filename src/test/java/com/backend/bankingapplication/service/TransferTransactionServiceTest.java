@@ -3,7 +3,6 @@ package com.backend.bankingapplication.service;
 import com.backend.bankingapplication.app.dto.create.TransferRequestDTO;
 import com.backend.bankingapplication.app.entity.Account;
 import com.backend.bankingapplication.app.repository.AccountRepository;
-import com.backend.bankingapplication.app.repository.TransferLogRepository;
 import com.backend.bankingapplication.app.service.AccountService;
 import com.backend.bankingapplication.app.service.TransferTransactionService;
 import com.backend.bankingapplication.core.exception.BadRequestDataException;
@@ -39,8 +38,8 @@ public class TransferTransactionServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
-    @Mock
-    private TransferLogRepository transferLogRepository;
+//    @Mock
+//    private TransferLogRepository transferLogRepository;
 
     private final Long toUserId = 1L;
     private final Long fromUserId = 2L;
@@ -83,7 +82,7 @@ public class TransferTransactionServiceTest {
         transferRequestDTO.setValue(BigDecimal.valueOf(100));
         transferRequestDTO.setIdempotencyKey(idempotencyKey);
 
-        when(transferLogRepository.existsByIdempotencyKey(idempotencyKey)).thenReturn(true);
+//        when(transferLogRepository.existsByIdempotencyKey(idempotencyKey)).thenReturn(true);
 
         assertThrows(
                 DuplicateRequestException.class,
@@ -110,8 +109,8 @@ public class TransferTransactionServiceTest {
                 .thenReturn(sourceAccount);
         when(accountService.findByUserIdIdWithLock(toUserId))
                 .thenReturn(targetAccount);
-        when(transferLogRepository.existsByIdempotencyKey(idempotencyKey))
-                .thenReturn(false);
+//        when(transferLogRepository.existsByIdempotencyKey(idempotencyKey))
+//                .thenReturn(false);
 
         transferTransactionService.secureTransfer(transferRequestDTO, fromUserId);
 
@@ -139,8 +138,8 @@ public class TransferTransactionServiceTest {
                 .thenReturn(sourceAccount);
         when(accountService.findByUserIdIdWithLock(toUserId))
                 .thenReturn(targetAccount);
-        when(transferLogRepository.existsByIdempotencyKey(idempotencyKey))
-                .thenReturn(false);
+//        when(transferLogRepository.existsByIdempotencyKey(idempotencyKey))
+//                .thenReturn(false);
 
         transferTransactionService.secureTransfer(transferRequestDTO, fromUserId);
 
@@ -167,8 +166,8 @@ public class TransferTransactionServiceTest {
                 .thenReturn(sourceAccount);
         when(accountService.findByUserIdIdWithLock(toUserId))
                 .thenReturn(targetAccount);
-        when(transferLogRepository.existsByIdempotencyKey(idempotencyKey))
-                .thenReturn(false);
+//        when(transferLogRepository.existsByIdempotencyKey(idempotencyKey))
+//                .thenReturn(false);
         doThrow(new DataAccessException("Database error") {})
                 .when(accountRepository).saveAll(anyList());
 
@@ -208,8 +207,8 @@ public class TransferTransactionServiceTest {
         when(accountService.findByUserIdIdWithLock(2L))
                 .thenReturn(firstTargetAccount)
                 .thenReturn(secondTargetAccount);
-        when(transferLogRepository.existsByIdempotencyKey(anyString()))
-                .thenReturn(false);
+//        when(transferLogRepository.existsByIdempotencyKey(anyString()))
+//                .thenReturn(false);
 
         Thread firstThread = new Thread(() -> {
             try {
